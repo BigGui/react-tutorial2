@@ -31,24 +31,42 @@ var TodoHeader = React.createClass({
 	}
 });
 
+var TodoFilter = React.createClass({
+
+	filterAction: function(event) {
+		this.props.filterChange(this.props.filter);
+	},
+
+	render: function() {
+		return (
+			<li>
+              <a className={this.props.selected ? 'selected' : ''} onClick={this.filterAction} href={"#/" + (this.props.filter === "All" ? "" : this.props.filter) }>{this.props.filter}</a>
+            </li>
+		);
+	}
+});
 
 var TodoFooter = React.createClass({
+	clearCompleted: function(event) {
+		event.preventDefault();
+		this.props.clearCompleted();
+	},
+
 	render: function() {
+
+		var self = this;
+
+		var filters = this.props.filters.map(function(filter, i){
+			return <TodoFilter filter={filter} selected={filter === self.props.currentFilter} filterChange={self.props.filterChange} />
+		});
+
 		return (
 	        <footer id="footer">
 	          <span id="todo-count"><strong>{this.props.nbLeft}</strong> item left</span>
 	          <ul id="filters">
-	            <li>
-	              <a class="selected" href="#/">All</a>
-	            </li>
-	            <li>
-	              <a href="#/active">Active</a>
-	            </li>
-	            <li>
-	              <a href="#/completed">Completed</a>
-	            </li>
+	            {filters}
 	          </ul>
-	          <button id="clear-completed">Clear completed (1)</button>
+	          <button id="clear-completed" onClick={this.clearCompleted}>Clear completed ({this.props.nbCompleted})</button>
 	        </footer>
 		);
 	}
@@ -65,19 +83,19 @@ var TodoItem = React.createClass({
 	},
 
 	render: function() {
+		var todo = this.props.todo,
+			classStr = '';
 
-		var classStr = '';
-
-		if (this.props.todo.completed) classStr += 'completed';
+		if (todo.completed) classStr += 'completed';
 
 		return (
             <li className={classStr}>
               <div className="view">
-                <input onClick={this.toggle} className="toggle" type="checkbox" checked={this.props.todo.completed} />
-                <label>{this.props.todo.name}</label>
+                <input onClick={this.toggle} className="toggle" type="checkbox" checked={todo.completed} />
+                <label>{todo.name}</label>
                 <button onClick={this.delete} className="destroy"></button>
               </div>
-              <input className="edit" value="Create a TodoMVC template" />
+              <input className="edit" value="" />
             </li>
 		);
 	}
@@ -101,12 +119,24 @@ var TodoList = React.createClass({
 		this.setState({todos: this.state.todos});
 	},
 
+	filterChange: function(filter) {
+		this.setState({currentFilter: filter});
+	},
+
+	clearCompleted: function() {
+		this.setState({todos: this.state.todos.filter(function(elem) { return !elem.completed})});
+	},
+
 	getInitialState: function() {
 
-		return { todos: [
-			{ name: "Faire la vaisselle", completed: true },
-			{ name: "Faire le ménage", completed: false }
-		]};
+		return {
+			todos: [
+				{ name: "Faire la vaisselle", completed: true },
+				{ name: "Faire le ménage", completed: false }
+			],
+			filters: ["All", "Active", "Completed"],
+			currentFilter: "All"
+		};
 
 	},
 
@@ -114,13 +144,28 @@ var TodoList = React.createClass({
 
 		var self = this;
 
-		var rows = this.state.todos.map(function(todo, i) {
-			return (
-				<TodoItem todo={todo} itemId={i} delete={self.deleteItem} toggle={self.toggleItem} />
-			);
-		});
+		var rows = this.state.todos
+				.filter(function(elem){
+					switch(self.state.currentFilter) {
+						case "Active" :
+							return !elem.completed;
+							
+						case "Completed" :
+							return elem.completed;
+
+						default:
+							return true;
+					}
+				})
+				.map(function(todo, i) {
+					return (
+						<TodoItem todo={todo} itemId={i} delete={self.deleteItem} toggle={self.toggleItem} />
+					);
+				});
 
 		var nbLeft = this.state.todos.filter(function(elem){ return !elem.completed }).length;
+
+		var nbCompleted = this.state.todos.filter(function(elem){ return elem.completed }).length;
 
 		return (
 			<div>
@@ -132,7 +177,12 @@ var TodoList = React.createClass({
 		            {rows}
 		          </ul>
 		        </section>
-				<TodoFooter nbLeft={nbLeft} />
+				<TodoFooter	nbLeft={nbLeft}
+							nbCompleted={nbCompleted}
+							filters={this.state.filters}
+							currentFilter={this.state.currentFilter}
+							filterChange={this.filterChange}
+							clearCompleted={this.clearCompleted} />
 	        </div>
 		);
 	}
