@@ -13,7 +13,7 @@ var TodoHeader = React.createClass({
 		this.props.add(this.state.val);
 		this.setState({val: ''});
 
-		console.log("Ajout !");
+		return false;
 	},
 
 	render: function() {
@@ -62,9 +62,7 @@ var TodoFooter = React.createClass({
 		return (
 	        <footer id="footer">
 	          <span id="todo-count"><strong>{this.props.nbLeft}</strong> item left</span>
-	          <ul id="filters">
-	            {filters}
-	          </ul>
+	          <ul id="filters">{filters}</ul>
 	          <button id="clear-completed" onClick={this.clearCompleted}>Clear completed ({this.props.nbCompleted})</button>
 	        </footer>
 		);
