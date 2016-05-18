@@ -39,6 +39,10 @@ var TodoItem = React.createClass({
 		this.props.delete(this.props.itemId);
 	},
 
+	toggle: function() {
+		this.props.toggle(this.props.itemId);
+	},
+
 	render: function() {
 
 		var classStr = '';
@@ -48,7 +52,7 @@ var TodoItem = React.createClass({
 		return (
             <li className={classStr}>
               <div className="view">
-                <input className="toggle" type="checkbox" checked />
+                <input onClick={this.toggle} className="toggle" type="checkbox" checked />
                 <label>{this.props.todo.name}</label>
                 <button onClick={this.delete} className="destroy"></button>
               </div>
@@ -63,6 +67,11 @@ var TodoList = React.createClass({
 
 	deleteItem: function(itemId) {
 		this.state.todos.splice(itemId, 1);
+		this.setState({todos: this.state.todos});
+	},
+
+	toggleItem: function(itemId) {
+		this.state.todos[itemId].completed = !this.state.todos[itemId].completed;
 		this.setState({todos: this.state.todos});
 	},
 
@@ -81,7 +90,7 @@ var TodoList = React.createClass({
 
 		var rows = this.state.todos.map(function(todo, i) {
 			return (
-				<TodoItem todo={todo} itemId={i} delete={self.deleteItem} />
+				<TodoItem todo={todo} itemId={i} delete={self.deleteItem} toggle={self.toggleItem} />
 			);
 		});
 
