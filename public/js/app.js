@@ -1,10 +1,31 @@
 
 var TodoHeader = React.createClass({
+	getInitialState: function () {
+		return {val: ''};
+	},
+
+	handleChange: function(event) {
+		this.setState({val: event.target.value});
+	},
+
+	add: function(event) {
+		event.preventDefault();
+
+		this.props.add(this.state.val);
+		this.setState({val: ''});
+
+		console.log("Ajout !");
+	},
+
 	render: function() {
 		return (
 	        <header id="header">
 	          <h1>todos</h1>
-	          <input id="new-todo" placeholder="What needs to be done?" autofocus />
+	          <form onSubmit={this.add}>
+	          	<input id="new-todo"	onChange={this.handleChange}
+	          							value={this.state.val}
+	          							placeholder="What needs to be done?" autofocus />
+	          </form>
 	        </header>
 		);
 	}
@@ -15,7 +36,7 @@ var TodoFooter = React.createClass({
 	render: function() {
 		return (
 	        <footer id="footer">
-	          <span id="todo-count"><strong>1</strong> item left</span>
+	          <span id="todo-count"><strong>{this.props.nbLeft}</strong> item left</span>
 	          <ul id="filters">
 	            <li>
 	              <a class="selected" href="#/">All</a>
@@ -52,7 +73,7 @@ var TodoItem = React.createClass({
 		return (
             <li className={classStr}>
               <div className="view">
-                <input onClick={this.toggle} className="toggle" type="checkbox" checked />
+                <input onClick={this.toggle} className="toggle" type="checkbox" checked={this.props.todo.completed} />
                 <label>{this.props.todo.name}</label>
                 <button onClick={this.delete} className="destroy"></button>
               </div>
@@ -75,6 +96,11 @@ var TodoList = React.createClass({
 		this.setState({todos: this.state.todos});
 	},
 
+	addItem: function(value) {
+		this.state.todos.push({ name: value, completed: false});
+		this.setState({todos: this.state.todos});
+	},
+
 	getInitialState: function() {
 
 		return { todos: [
@@ -94,9 +120,11 @@ var TodoList = React.createClass({
 			);
 		});
 
+		var nbLeft = this.state.todos.filter(function(elem){ return !elem.completed }).length;
+
 		return (
 			<div>
-				<TodoHeader />
+				<TodoHeader add={this.addItem} />
 				<section id="main">
 		          <input id="toggle-all" type="checkbox" />
 		          <label htmlFor="toggle-all">Mark all as complete</label>
@@ -104,7 +132,7 @@ var TodoList = React.createClass({
 		            {rows}
 		          </ul>
 		        </section>
-				<TodoFooter />
+				<TodoFooter nbLeft={nbLeft} />
 	        </div>
 		);
 	}
