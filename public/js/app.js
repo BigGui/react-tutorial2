@@ -1,4 +1,3 @@
-
 var TodoHeader = React.createClass({
 	getInitialState: function () {
 		return {val: ''};
@@ -57,7 +56,7 @@ var TodoFooter = React.createClass({
 		var self = this;
 
 		var filters = this.props.filters.map(function(filter, i){
-			return <TodoFilter filter={filter} selected={filter === self.props.currentFilter} filterChange={self.props.filterChange} />
+			return <TodoFilter filter={filter} key={i} selected={filter === self.props.currentFilter} filterChange={self.props.filterChange} />
 		});
 
 		return (
@@ -91,7 +90,7 @@ var TodoItem = React.createClass({
 		return (
             <li className={classStr}>
               <div className="view">
-                <input onClick={this.toggle} className="toggle" type="checkbox" checked={todo.completed} />
+                <input onChange={this.toggle} className="toggle" type="checkbox" checked={todo.completed} />
                 <label>{todo.name}</label>
                 <button onClick={this.delete} className="destroy"></button>
               </div>
@@ -159,7 +158,7 @@ var TodoList = React.createClass({
 				})
 				.map(function(todo, i) {
 					return (
-						<TodoItem todo={todo} itemId={i} delete={self.deleteItem} toggle={self.toggleItem} />
+						<TodoItem todo={todo} key={i} itemId={i} delete={self.deleteItem} toggle={self.toggleItem} />
 					);
 				});
 
